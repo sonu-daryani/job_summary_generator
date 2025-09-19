@@ -1,10 +1,10 @@
 # 🚀 Job Summary Generator
 
-A modern, AI-powered web application that transforms bullet points into professional job summaries using Llama 2 or Hugging Face's free API. Built with Python, FastAPI, and optimized for performance.
+A modern, AI-powered web application that transforms bullet points into professional job summaries using Llama 4 Scout, Llama 2, or Hugging Face's free API. Built with Python, FastAPI, and optimized for performance.
 
 ## ✨ Features
 
-- **AI-Powered Generation**: Uses Llama 2 (local) or Hugging Face's free API to generate professional summaries
+- **AI-Powered Generation**: Uses Llama 4 Scout (latest), Llama 2 (local), or Hugging Face's free API to generate professional summaries
 - **Modern UI**: Beautiful, responsive interface with smooth animations
 - **Real-time Generation**: Fast, asynchronous processing
 - **Copy & Regenerate**: Easy-to-use buttons for copying and regenerating summaries
@@ -15,7 +15,7 @@ A modern, AI-powered web application that transforms bullet points into professi
 ## 🛠️ Tech Stack
 
 - **Backend**: Python 3.8+, FastAPI, Uvicorn
-- **AI Service**: Llama 2 (local) or Hugging Face Inference API (Free tier)
+- **AI Service**: Llama 4 Scout (latest), Llama 2 (local), or Hugging Face Inference API (Free tier)
 - **Frontend**: HTML5, CSS3, Vanilla JavaScript
 - **Configuration**: Python-dotenv for environment management
 - **Validation**: Pydantic for request/response validation
@@ -28,6 +28,7 @@ A modern, AI-powered web application that transforms bullet points into professi
 ### Prerequisites
 
 - Python 3.8 or higher
+- For Llama 4 Scout: Access to Meta's Llama 4 Scout model (provided)
 - For Llama 2 (local): 8GB+ RAM recommended, GPU optional but recommended
 - For Hugging Face API: A free Hugging Face account and API key
 
@@ -75,13 +76,18 @@ A modern, AI-powered web application that transforms bullet points into professi
 
 5. **Configure your AI model**
    
-   **Option A: Use Llama 2 (Recommended)**
-   - Set `USE_LOCAL_MODEL=true` in your `.env` file
+   **Option A: Use Llama 4 Scout (Recommended)**
+   - Set `USE_LOCAL_MODEL=true` and `USE_LLAMA4=true` in your `.env` file
+   - The app will use the provided Llama 4 Scout access URL
+   - No additional setup required - works out of the box
+   
+   **Option B: Use Llama 2 (Fallback)**
+   - Set `USE_LOCAL_MODEL=true` and `USE_LLAMA4=false` in your `.env` file
    - The app will automatically download and use Llama 2-7b-chat-hf
    - For better performance, use a GPU by setting `DEVICE=cuda`
    - For Apple Silicon Macs, set `DEVICE=mps`
    
-   **Option B: Use Hugging Face API (Fallback)**
+   **Option C: Use Hugging Face API (Fallback)**
    - Set `USE_LOCAL_MODEL=false` in your `.env` file
    - Get your free Hugging Face API key:
      - Go to [Hugging Face](https://huggingface.co/)
@@ -92,7 +98,7 @@ A modern, AI-powered web application that transforms bullet points into professi
 
 6. **Test the integration (Optional)**
    ```bash
-   python test_llama2.py
+   python test_llama_integration.py
    ```
 
 7. **Run the application**

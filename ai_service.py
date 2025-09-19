@@ -1,6 +1,6 @@
 """
-AI service module for integrating with Llama 2 and Hugging Face API.
-Implements optimized text generation for job summaries using local Llama 2 model.
+AI service module for integrating with Llama 4 Scout, Llama 2, and Hugging Face API.
+Implements optimized text generation for job summaries using local Llama models.
 """
 import asyncio
 import aiohttp
@@ -16,10 +16,12 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 class AIService:
-    """Service class for AI-powered content generation using Llama 2."""
+    """Service class for AI-powered content generation using Llama 4 Scout, Llama 2, or Hugging Face API."""
     
     def __init__(self):
         self.use_local_model = settings.use_local_model
+        self.use_llama4 = settings.use_llama4
+        self.llama4_client = None
         self.model = None
         self.tokenizer = None
         self.device = None
@@ -29,12 +31,44 @@ class AIService:
         self.headers = settings.get_huggingface_headers()
         self.session: Optional[aiohttp.ClientSession] = None
         
-        logger.info(f"Using {'local Llama 2' if self.use_local_model else 'Hugging Face API'}")
+        logger.info(f"Using {'Llama 4 Scout' if self.use_llama4 else 'Llama 2' if self.use_local_model else 'Hugging Face API'}")
         
         if self.use_local_model:
-            self._initialize_llama_model()
+            if self.use_llama4:
+                self._initialize_llama4()
+            else:
+                self._initialize_llama2()
     
-    def _initialize_llama_model(self):
+    def _initialize_llama4(self):
+        """Initialize the Llama 4 Scout model using llama-stack."""
+        try:
+            from llama import Llama
+            
+            logger.info("Initializing Llama 4 Scout...")
+            
+            # Get Llama 4 configuration
+            llama4_config = settings.get_llama4_config()
+            
+            # Initialize Llama 4 client
+            self.llama4_client = Llama(
+                model_id=llama4_config["model_id"],
+                custom_url=llama4_config["custom_url"]
+            )
+            
+            logger.info("Llama 4 Scout initialized successfully")
+            
+        except ImportError as e:
+            logger.error(f"llama-stack not installed: {e}")
+            logger.info("Falling back to Llama 2")
+            self.use_llama4 = False
+            self._initialize_llama2()
+        except Exception as e:
+            logger.error(f"Failed to initialize Llama 4 Scout: {e}")
+            logger.info("Falling back to Llama 2")
+            self.use_llama4 = False
+            self._initialize_llama2()
+    
+    def _initialize_llama2(self):
         """Initialize the Llama 2 model and tokenizer."""
         try:
             from transformers import AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig
@@ -120,8 +154,18 @@ class AIService:
         if self.session:
             await self.session.close()
     
-    def _create_prompt(self, bullet_points: List[str]) -> str:
-        """Create an optimized prompt for job summary generation with Llama 2."""
+    def _create_llama4_prompt(self, bullet_points: List[str]) -> str:
+        """Create an optimized prompt for Llama 4 Scout."""
+        bullet_text = " ".join(bullet_points)
+        
+        prompt = f"""Create a professional job summary for someone with these skills and experiences: {bullet_text}
+
+The summary should be 2-3 sentences and highlight the person's key skills and experience in a professional manner."""
+        
+        return prompt
+    
+    def _create_llama2_prompt(self, bullet_points: List[str]) -> str:
+        """Create an optimized prompt for Llama 2."""
         bullet_text = " ".join(bullet_points)
         
         # Llama 2 chat format
@@ -142,17 +186,48 @@ Create a professional job summary for someone with these skills and experiences:
     async def generate_summary(self, bullet_points: List[str]) -> str:
         """
         Generate a professional job summary from bullet points.
-        Uses local Llama 2 model with Hugging Face API fallback.
+        Uses Llama 4 Scout, Llama 2, or Hugging Face API in order of preference.
         """
-        if self.use_local_model and self.model is not None:
-            return await self._generate_with_llama(bullet_points)
-        else:
-            return await self._generate_with_hf_api(bullet_points)
+        if self.use_local_model:
+            if self.use_llama4 and self.llama4_client:
+                return await self._generate_with_llama4(bullet_points)
+            elif self.model is not None:
+                return await self._generate_with_llama2(bullet_points)
+        
+        return await self._generate_with_hf_api(bullet_points)
     
-    async def _generate_with_llama(self, bullet_points: List[str]) -> str:
+    async def _generate_with_llama4(self, bullet_points: List[str]) -> str:
+        """Generate summary using Llama 4 Scout."""
+        try:
+            prompt = self._create_llama4_prompt(bullet_points)
+            
+            logger.info(f"Generating summary with Llama 4 Scout for {len(bullet_points)} bullet points")
+            
+            # Use Llama 4 Scout to generate response
+            response = self.llama4_client.generate(
+                prompt=prompt,
+                max_tokens=150,
+                temperature=0.7,
+                top_p=0.9
+            )
+            
+            # Extract generated text
+            generated_text = response.get("text", "")
+            
+            # Clean up the generated text
+            summary = self._clean_generated_text(generated_text)
+            logger.info("Summary generated successfully with Llama 4 Scout")
+            return summary
+            
+        except Exception as e:
+            logger.error(f"Llama 4 Scout generation failed: {e}")
+            logger.info("Falling back to Llama 2")
+            return await self._generate_with_llama2(bullet_points)
+    
+    async def _generate_with_llama2(self, bullet_points: List[str]) -> str:
         """Generate summary using local Llama 2 model."""
         try:
-            prompt = self._create_prompt(bullet_points)
+            prompt = self._create_llama2_prompt(bullet_points)
             
             # Tokenize input
             inputs = self.tokenizer(
