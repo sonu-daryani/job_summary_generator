@@ -1,10 +1,10 @@
 # 🚀 Job Summary Generator
 
-A modern, AI-powered web application that transforms bullet points into professional job summaries using Hugging Face's free API. Built with Python, FastAPI, and optimized for performance.
+A modern, AI-powered web application that transforms bullet points into professional job summaries using Llama 2 or Hugging Face's free API. Built with Python, FastAPI, and optimized for performance.
 
 ## ✨ Features
 
-- **AI-Powered Generation**: Uses Hugging Face's free API to generate professional summaries
+- **AI-Powered Generation**: Uses Llama 2 (local) or Hugging Face's free API to generate professional summaries
 - **Modern UI**: Beautiful, responsive interface with smooth animations
 - **Real-time Generation**: Fast, asynchronous processing
 - **Copy & Regenerate**: Easy-to-use buttons for copying and regenerating summaries
@@ -15,7 +15,7 @@ A modern, AI-powered web application that transforms bullet points into professi
 ## 🛠️ Tech Stack
 
 - **Backend**: Python 3.8+, FastAPI, Uvicorn
-- **AI Service**: Hugging Face Inference API (Free tier)
+- **AI Service**: Llama 2 (local) or Hugging Face Inference API (Free tier)
 - **Frontend**: HTML5, CSS3, Vanilla JavaScript
 - **Configuration**: Python-dotenv for environment management
 - **Validation**: Pydantic for request/response validation
@@ -25,7 +25,8 @@ A modern, AI-powered web application that transforms bullet points into professi
 ### Prerequisites
 
 - Python 3.8 or higher
-- A free Hugging Face account and API key
+- For Llama 2 (local): 8GB+ RAM recommended, GPU optional but recommended
+- For Hugging Face API: A free Hugging Face account and API key
 
 ### Installation
 
@@ -49,7 +50,16 @@ A modern, AI-powered web application that transforms bullet points into professi
    
    Create a `.env` file in the project root:
    ```env
-   # Hugging Face API Configuration
+   # AI Model Configuration
+   # Set to true to use local Llama 2 model, false to use Hugging Face API
+   USE_LOCAL_MODEL=true
+   
+   # Llama 2 Model Configuration (when USE_LOCAL_MODEL=true)
+   LLAMA_MODEL_NAME=meta-llama/Llama-2-7b-chat-hf
+   DEVICE=auto
+   # MAX_MEMORY=8GB  # Optional: Set max GPU memory
+   
+   # Hugging Face API Configuration (fallback when USE_LOCAL_MODEL=false)
    HUGGINGFACE_API_KEY=your_free_huggingface_api_key_here
    HUGGINGFACE_API_URL=https://api-inference.huggingface.co/models/microsoft/DialoGPT-medium
    
@@ -60,14 +70,29 @@ A modern, AI-powered web application that transforms bullet points into professi
    PORT=8000
    ```
 
-5. **Get your free Hugging Face API key**
-   - Go to [Hugging Face](https://huggingface.co/)
-   - Sign up for a free account
-   - Go to Settings → Access Tokens
-   - Create a new token
-   - Copy the token and paste it in your `.env` file
+5. **Configure your AI model**
+   
+   **Option A: Use Llama 2 (Recommended)**
+   - Set `USE_LOCAL_MODEL=true` in your `.env` file
+   - The app will automatically download and use Llama 2-7b-chat-hf
+   - For better performance, use a GPU by setting `DEVICE=cuda`
+   - For Apple Silicon Macs, set `DEVICE=mps`
+   
+   **Option B: Use Hugging Face API (Fallback)**
+   - Set `USE_LOCAL_MODEL=false` in your `.env` file
+   - Get your free Hugging Face API key:
+     - Go to [Hugging Face](https://huggingface.co/)
+     - Sign up for a free account
+     - Go to Settings → Access Tokens
+     - Create a new token
+     - Copy the token and paste it in your `.env` file
 
-6. **Run the application**
+6. **Test the integration (Optional)**
+   ```bash
+   python test_llama2.py
+   ```
+
+7. **Run the application**
    
    With uv:
    ```bash
