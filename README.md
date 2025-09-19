@@ -20,6 +20,9 @@ A modern, AI-powered web application that transforms bullet points into professi
 - **Configuration**: Python-dotenv for environment management
 - **Validation**: Pydantic for request/response validation
 
+<img width="1891" height="1049" alt="image" src="https://github.com/user-attachments/assets/6e7134a6-7933-42d2-b3b9-725820e6305d" />
+
+
 ## 🚀 Quick Start
 
 ### Prerequisites
