@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Summary Generator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: #374151;
+            font-size: 1.1rem;
+        }
+
+        .bullet-input {
+            width: 100%;
+            min-height: 120px;
+            padding: 15px;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-family: inherit;
+            resize: vertical;
+            transition: border-color 0.3s ease;
+        }
+
+        .bullet-input:focus {
+            outline: none;
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+        .bullet-input::placeholder {
+            color: #9ca3af;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            color: white;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(79, 70, 229, 0.3);
+        }
+
+        .btn-secondary {
+            background: #f3f4f6;
+            color: #374151;
+            border: 2px solid #e5e7eb;
+        }
+
+        .btn-secondary:hover:not(:disabled) {
+            background: #e5e7eb;
+            transform: translateY(-1px);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f4f6;
+            border-top: 4px solid #4f46e5;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .result-section {
+            display: none;
+            margin-top: 30px;
+            padding: 25px;
+            background: #f8fafc;
+            border-radius: 15px;
+            border-left: 5px solid #4f46e5;
+        }
+
+        .result-section h3 {
+            color: #374151;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+
+        .summary-text {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            border: 2px solid #e5e7eb;
+            font-size: 1.1rem;
+            line-height: 1.6;
+            color: #374151;
+            margin-bottom: 20px;
+            min-height: 80px;
+        }
+
+        .copy-success {
+            display: none;
+            color: #059669;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+
+        .error-message {
+            display: none;
+            background: #fef2f2;
+            color: #dc2626;
+            padding: 15px;
+            border-radius: 10px;
+            border: 2px solid #fecaca;
+            margin-top: 20px;
+        }
+
+        .example-section {
+            background: #f0f9ff;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            border: 2px solid #bae6fd;
+        }
+
+        .example-section h4 {
+            color: #0369a1;
+            margin-bottom: 10px;
+        }
+
+        .example-bullets {
+            color: #0c4a6e;
+            font-style: italic;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                border-radius: 15px;
+            }
+            
+            .header {
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .content {
+                padding: 25px;
+            }
+            
+            .button-group {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 Job Summary Generator</h1>
+            <p>Transform your bullet points into a professional job summary using AI</p>
+        </div>
+        
+        <div class="content">
+            <div class="example-section">
+                <h4>💡 Example Input:</h4>
+                <div class="example-bullets">
+                    • 5 years of Python development experience<br>
+                    • Led a team of 3 developers on a major project<br>
+                    • Implemented microservices architecture<br>
+                    • Experience with FastAPI and Django frameworks
+                </div>
+            </div>
+
+            <form id="summaryForm">
+                <div class="form-group">
+                    <label for="bulletPoints">Enter your work experience bullet points:</label>
+                    <textarea 
+                        id="bulletPoints" 
+                        class="bullet-input" 
+                        placeholder="Enter each bullet point on a new line...&#10;&#10;Example:&#10;• 5 years of Python development experience&#10;• Led a team of 3 developers&#10;• Implemented microservices architecture"
+                        required
+                    ></textarea>
+                </div>
+
+                <div class="button-group">
+                    <button type="submit" class="btn btn-primary" id="generateBtn">
+                        <span>✨</span>
+                        Generate Summary
+                    </button>
+                    <button type="button" class="btn btn-secondary" id="regenerateBtn" style="display: none;">
+                        <span>🔄</span>
+                        Regenerate
+                    </button>
+                    <button type="button" class="btn btn-secondary" id="copyBtn" style="display: none;">
+                        <span>📋</span>
+                        Copy Summary
+                    </button>
+                </div>
+            </form>
+
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Generating your professional summary...</p>
+            </div>
+
+            <div class="error-message" id="errorMessage"></div>
+
+            <div class="result-section" id="resultSection">
+                <h3>📝 Generated Summary:</h3>
+                <div class="summary-text" id="summaryText"></div>
+                <div class="copy-success" id="copySuccess">✅ Summary copied to clipboard!</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class JobSummaryGenerator {
+            constructor() {
+                this.form = document.getElementById('summaryForm');
+                this.bulletPointsInput = document.getElementById('bulletPoints');
+                this.generateBtn = document.getElementById('generateBtn');
+                this.regenerateBtn = document.getElementById('regenerateBtn');
+                this.copyBtn = document.getElementById('copyBtn');
+                this.loading = document.getElementById('loading');
+                this.errorMessage = document.getElementById('errorMessage');
+                this.resultSection = document.getElementById('resultSection');
+                this.summaryText = document.getElementById('summaryText');
+                this.copySuccess = document.getElementById('copySuccess');
+                
+                this.currentSummary = '';
+                this.currentBulletPoints = [];
+                
+                this.initializeEventListeners();
+            }
+
+            initializeEventListeners() {
+                this.form.addEventListener('submit', (e) => this.handleSubmit(e));
+                this.regenerateBtn.addEventListener('click', () => this.handleRegenerate());
+                this.copyBtn.addEventListener('click', () => this.handleCopy());
+            }
+
+            async handleSubmit(e) {
+                e.preventDefault();
+                await this.generateSummary();
+            }
+
+            async handleRegenerate() {
+                if (this.currentBulletPoints.length === 0) {
+                    this.showError('No previous bullet points to regenerate from. Please enter new bullet points.');
+                    return;
+                }
+                await this.generateSummary();
+            }
+
+            async generateSummary() {
+                const bulletPointsText = this.bulletPointsInput.value.trim();
+                
+                if (!bulletPointsText) {
+                    this.showError('Please enter at least one bullet point.');
+                    return;
+                }
+
+                // Parse bullet points
+                const bulletPoints = bulletPointsText
+                    .split('\n')
+                    .map(point => point.trim())
+                    .filter(point => point.length > 0)
+                    .map(point => point.replace(/^[•\-\*]\s*/, '')); // Remove bullet symbols
+
+                if (bulletPoints.length === 0) {
+                    this.showError('Please enter valid bullet points.');
+                    return;
+                }
+
+                this.currentBulletPoints = bulletPoints;
+                this.showLoading(true);
+                this.hideError();
+                this.hideResult();
+
+                try {
+                    const response = await fetch('/api/v1/generate-summary', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            bullet_points: bulletPoints
+                        })
+                    });
+
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.detail || 'Failed to generate summary');
+                    }
+
+                    const data = await response.json();
+                    this.currentSummary = data.summary;
+                    this.showResult(data.summary);
+                    
+                } catch (error) {
+                    console.error('Error generating summary:', error);
+                    this.showError(`Failed to generate summary: ${error.message}`);
+                } finally {
+                    this.showLoading(false);
+                }
+            }
+
+            async handleCopy() {
+                if (!this.currentSummary) {
+                    this.showError('No summary to copy.');
+                    return;
+                }
+
+                try {
+                    await navigator.clipboard.writeText(this.currentSummary);
+                    this.showCopySuccess();
+                } catch (error) {
+                    console.error('Error copying to clipboard:', error);
+                    // Fallback for older browsers
+                    this.fallbackCopy();
+                }
+            }
+
+            fallbackCopy() {
+                const textArea = document.createElement('textarea');
+                textArea.value = this.currentSummary;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                this.showCopySuccess();
+            }
+
+            showLoading(show) {
+                this.loading.style.display = show ? 'block' : 'none';
+                this.generateBtn.disabled = show;
+                this.regenerateBtn.disabled = show;
+            }
+
+            showError(message) {
+                this.errorMessage.textContent = message;
+                this.errorMessage.style.display = 'block';
+                setTimeout(() => {
+                    this.hideError();
+                }, 5000);
+            }
+
+            hideError() {
+                this.errorMessage.style.display = 'none';
+            }
+
+            showResult(summary) {
+                this.summaryText.textContent = summary;
+                this.resultSection.style.display = 'block';
+                this.regenerateBtn.style.display = 'inline-flex';
+                this.copyBtn.style.display = 'inline-flex';
+            }
+
+            hideResult() {
+                this.resultSection.style.display = 'none';
+                this.regenerateBtn.style.display = 'none';
+                this.copyBtn.style.display = 'none';
+            }
+
+            showCopySuccess() {
+                this.copySuccess.style.display = 'block';
+                setTimeout(() => {
+                    this.copySuccess.style.display = 'none';
+                }, 3000);
+            }
+        }
+
+        // Initialize the application when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            new JobSummaryGenerator();
+        });
+    </script>
+</body>
+</html>
