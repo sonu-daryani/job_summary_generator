@@ -220,17 +220,6 @@ Main application page.
    - Make sure you're accessing `http://localhost:8000`
    - Check that the `templates/index.html` file exists
 
-## 🔒 Security Notes
-
-- Never commit your `.env` file to version control
-- The `.env` file is already in `.gitignore`
-- API keys are only used for server-side requests
-- No sensitive data is stored or logged
-
-## 📝 License
-
-This project is open source and available under the MIT License.
-
 ## 🤝 Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
